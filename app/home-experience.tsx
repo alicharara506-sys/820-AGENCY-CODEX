@@ -1,15 +1,34 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import AlgoVisual from '@/components/algo/algo-visual';
+import AlgoVisual, { AlgoGuide } from '@/components/algo/algo-visual';
 import { AlgoProvider, type AlgoState, useAlgo } from '@/components/algo/algo-controller';
 
-const disciplines: { name: string; number: string; purpose: string; state: AlgoState; services: string[] }[] = [
-  { name: 'Brand', number: '01', purpose: 'We define the identity.', state: 'creative', services: ['Brand Strategy', 'Brand Positioning', 'Naming', 'Visual Identity', 'Brand Guidelines', 'Creative Direction', 'Packaging'] },
-  { name: 'Digital', number: '02', purpose: 'We create attention and communication.', state: 'communicating', services: ['Digital Strategy', 'Social Media', 'Content Creation', 'Campaigns', 'Advertising Creative', 'Motion Content', 'Growth Marketing'] },
-  { name: 'Technology', number: '03', purpose: 'We build the experience and infrastructure.', state: 'building', services: ['Websites', 'E-commerce', 'UI/UX', 'Interactive Experiences', '3D Websites', 'Web Applications', 'SaaS', 'Custom Software', 'APIs and Integrations'] },
-  { name: 'AI', number: '04', purpose: 'We make systems intelligent.', state: 'thinking', services: ['AI Applications', 'AI Agents', 'Workflow Automation', 'AI Integration', 'Customer Automation', 'Process Automation', 'Multi-Agent Systems'] },
-  { name: 'Analytics', number: '05', purpose: 'We turn data into decisions.', state: 'analyzing', services: ['Business Analytics', 'KPI Tracking', 'Performance Dashboards', 'Sales Analytics', 'Marketing Analytics', 'Customer Analytics', 'Operational Analytics', 'Forecasting', 'Automated Reporting', 'AI-Powered Insights'] },
+type Discipline = {
+  name: string;
+  number: string;
+  purpose: string;
+  state: AlgoState;
+  services: string[];
+  controls: { label: string; note: string }[];
+};
+
+const disciplines: Discipline[] = [
+  { name: 'Brand', number: '01', purpose: 'We define the identity.', state: 'creative', services: ['Brand Strategy', 'Brand Positioning', 'Naming', 'Visual Identity', 'Brand Guidelines', 'Creative Direction', 'Packaging'], controls: [
+    { label: 'Strategy', note: 'Mapping a distinct position.' }, { label: 'Naming', note: 'Testing language with memory.' }, { label: 'Identity', note: 'Assembling the visual system.' }, { label: 'Typography', note: 'Calibrating voice and rhythm.' }, { label: 'Colour', note: 'Balancing energy and recognition.' }, { label: 'Motion', note: 'Giving the system purposeful movement.' }, { label: 'Packaging', note: 'Extending identity into physical touchpoints.' },
+  ] },
+  { name: 'Digital', number: '02', purpose: 'We create attention and communication.', state: 'communicating', services: ['Digital Strategy', 'Social Media', 'Content Creation', 'Campaigns', 'Advertising Creative', 'Motion Content', 'Growth Marketing'], controls: [
+    { label: 'Instagram', note: 'Shaping a visual publishing system.' }, { label: 'Facebook', note: 'Structuring community and campaign touchpoints.' }, { label: 'TikTok', note: 'Planning short-form motion narratives.' }, { label: 'LinkedIn', note: 'Translating expertise into authority.' }, { label: 'YouTube', note: 'Building a long-form content engine.' }, { label: 'Search', note: 'Connecting intent to useful content.' }, { label: 'Email', note: 'Designing owned communication journeys.' },
+  ] },
+  { name: 'Technology', number: '03', purpose: 'We build the experience and infrastructure.', state: 'building', services: ['Websites', 'E-commerce', 'UI/UX', 'Interactive Experiences', '3D Websites', 'Web Applications', 'SaaS', 'Custom Software', 'APIs and Integrations'], controls: [
+    { label: 'JavaScript', note: 'Activating the interaction layer.' }, { label: 'TypeScript', note: 'Making the system safer to evolve.' }, { label: 'Python', note: 'Connecting data, automation, and intelligence.' }, { label: 'Java', note: 'Structuring robust application services.' }, { label: 'React', note: 'Composing a responsive interface system.' }, { label: 'Next.js', note: 'Optimizing the production web experience.' }, { label: 'Node.js', note: 'Powering services and integrations.' }, { label: 'APIs', note: 'Connecting the parts into one product.' },
+  ] },
+  { name: 'AI', number: '04', purpose: 'We make systems intelligent.', state: 'thinking', services: ['AI Applications', 'AI Agents', 'Workflow Automation', 'AI Integration', 'Customer Automation', 'Process Automation', 'Multi-Agent Systems'], controls: [
+    { label: 'Agents', note: 'Coordinating specialized intelligent roles.' }, { label: 'Automation', note: 'Removing repetitive operational friction.' }, { label: 'RAG', note: 'Grounding answers in trusted knowledge.' }, { label: 'Vision', note: 'Teaching systems to understand images.' }, { label: 'Voice', note: 'Creating natural conversational interfaces.' }, { label: 'NLP', note: 'Turning language into structured action.' }, { label: 'Models', note: 'Selecting intelligence for the real task.' },
+  ] },
+  { name: 'Analytics', number: '05', purpose: 'We turn data into decisions.', state: 'analyzing', services: ['Business Analytics', 'KPI Tracking', 'Performance Dashboards', 'Sales Analytics', 'Marketing Analytics', 'Customer Analytics', 'Operational Analytics', 'Forecasting', 'Automated Reporting', 'AI-Powered Insights'], controls: [
+    { label: 'KPIs', note: 'Focusing attention on meaningful signals.' }, { label: 'Dashboards', note: 'Making performance readable at a glance.' }, { label: 'Forecasting', note: 'Turning patterns into forward direction.' }, { label: 'Funnels', note: 'Finding friction across the journey.' }, { label: 'Cohorts', note: 'Understanding behavior over time.' }, { label: 'Attribution', note: 'Connecting action to outcome.' }, { label: 'Reports', note: 'Delivering decisions without manual work.' },
+  ] },
 ];
 
 const process = [
@@ -42,10 +61,11 @@ function Opening({ onDone }: { onDone: () => void }) {
 }
 
 function Experience() {
-  const { controller, setDiscipline, setPointer, setState } = useAlgo();
+  const { controller, setDiscipline, setPointer, setState, activateTool } = useAlgo();
   const [intro, setIntro] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeProcess, setActiveProcess] = useState(0);
+  const [showGuide, setShowGuide] = useState(false);
   const [formState, setFormState] = useState<'idle' | 'error' | 'success'>('idle');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const cursor = useRef<HTMLDivElement>(null);
@@ -70,6 +90,13 @@ function Experience() {
     window.addEventListener('pointermove', onMove, { passive: true });
     return () => window.removeEventListener('pointermove', onMove);
   }, [setPointer]);
+
+  useEffect(() => {
+    const onScroll = () => setShowGuide(window.scrollY > window.innerHeight * 0.72);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -101,6 +128,7 @@ function Experience() {
     <>
       {intro && <Opening onDone={endIntro} />}
       <div ref={cursor} className="custom-cursor" aria-hidden="true" />
+      <AlgoGuide visible={showGuide} />
       <header className="site-header">
         <a className="wordmark" href="#top" aria-label="820 Agency home">820</a>
         <p>Creative technology agency</p>
@@ -159,7 +187,7 @@ function Experience() {
           <div className="discipline-world">
             <div className="discipline-list" role="tablist" aria-label="820 disciplines">
               {disciplines.map((item) => (
-                <button key={item.name} role="tab" aria-selected={controller.activeDiscipline === item.name} onClick={() => setDiscipline(item.name, item.state)}>
+                <button key={item.name} role="tab" aria-selected={controller.activeDiscipline === item.name} onClick={() => setDiscipline(item.name, item.state, item.controls[0].label, item.controls[0].note)}>
                   <span>{item.number}</span>{item.name}<i aria-hidden="true">↗</i>
                 </button>
               ))}
@@ -178,6 +206,24 @@ function Experience() {
                   <ul>{item.services.map((service) => <li key={service}>{service}<span aria-hidden="true">+</span></li>)}</ul>
                 </div>
               ))}
+            </div>
+            <div className="control-deck" aria-label={`${controller.activeDiscipline} control keyboard`}>
+              <div className="deck-topline"><span>ALGO CONTROL DECK</span><span>PRESS A KEY TO DIRECT THE SCENE</span><i aria-hidden="true" /></div>
+              <div className="keybed" role="group" aria-label={`${controller.activeDiscipline} capabilities`}>
+                {disciplines.find((item) => item.name === controller.activeDiscipline)?.controls.map((control, index) => (
+                  <button
+                    key={control.label}
+                    className={controller.activeTool === control.label ? 'active' : ''}
+                    type="button"
+                    aria-pressed={controller.activeTool === control.label}
+                    onClick={() => activateTool(control.label, control.note, disciplines.find((item) => item.name === controller.activeDiscipline)?.state ?? 'focused')}
+                  >
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <b>{control.label}</b>
+                    <i aria-hidden="true">↗</i>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </section>
