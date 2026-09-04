@@ -51,6 +51,6 @@ export function useAlgo() {
 // Production GLB seam: switch mode and provide modelUrl once the approved model ships.
 export const ALGO_ASSET = {
   mode: 'image' as 'image' | 'model',
-  imageUrl: '/algo-reference.png',
+  imageUrl: '/algo-render-v3.png',
   modelUrl: null as string | null,
 };

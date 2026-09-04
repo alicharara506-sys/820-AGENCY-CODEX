@@ -126,7 +126,7 @@ function Experience() {
               </div>
             </div>
           </div>
-          <div className="hero-algo"><AlgoVisual variant="hero" /><p className="fallback-label">APPROVED IMAGE FALLBACK · 3D PIPELINE READY</p></div>
+          <div className="hero-algo"><AlgoVisual variant="hero" /><p className="fallback-label">ALGO / THE DIGITAL MIND OF 820</p></div>
           <p className="section-index">820—01 / SYSTEM ONLINE</p>
         </section>
 
