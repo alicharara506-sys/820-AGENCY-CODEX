@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import AlgoModel from './algo-model';
 import { ALGO_ASSET, useAlgo } from './algo-controller';
 
 type Props = { variant?: 'hero' | 'world' | 'contact'; className?: string };
@@ -23,6 +24,7 @@ export default function AlgoVisual({ variant = 'world', className = '' }: Props)
           className="algo-source"
         />
       </div>
+      <AlgoModel />
       <div className="algo-readout" aria-hidden="true"><span /> ALGO / {controller.state.toUpperCase()}</div>
       {variant === 'world' && (
         <div className="algo-output" aria-live="polite">
